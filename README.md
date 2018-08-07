@@ -1,5 +1,6 @@
 # nvidia-control-fan
- Automatic fan speed control for NVIDIA graphics cards in overclocking mode
+# Automatic fan speed control for NVIDIA graphics cards in overclocking mode
+
 Программа для автоматической регулировки скорости вращения вентиляторов видеокарт NVIDIA 
 в режиме overclocking
 Для работы программы необходимо установить следующие зависимости:
