@@ -1,0 +1,75 @@
+#!/bin/bash
+LogDir="/opt/mining/.log"
+LogFile="gpu.log"
+LOG="$LogDir/$LogFile"
+conf="/opt/mining/fan.cfg"
+export DISPLAY=:0.0
+NGPU=$(lspci | grep NVIDIA | grep VGA | wc -l)
+source $conf
+fanOnOff() {
+	nvidia-settings -a "[gpu:$1]/GPUFanControlState=$2"  >> $LOG
+}
+fanSpeed() {
+    nvidia-settings -a "[fan:$1]/GPUTargetFanSpeed=$2"  >> $LOG
+}
+
+if [ $control = "off" ] ; then
+	exit 0
+fi
+
+for (( i=0; i < $NGPU; i++))
+do
+	fGPU=$(nvidia-smi --id=$i --query-gpu=fan.speed --format=csv | \
+awk 'BEGIN{FS="\n"; RS=""} {print $2}' | awk '{print $1}')
+	tGPU=$(nvidia-smi --id=$i --query-gpu=temperature.gpu --format=csv | \
+awk 'BEGIN{FS="\n"; RS=""} {print $2}' | awk '{print $1}')
+echo $(date +'%d-%m-%Y %T') >> $LOG
+echo GPU$i $fGPU\% $tGPU\C  >> $LOG
+if [ $tGPU -le $T_MIN ] ; then
+	echo "F-AUTO Включаем автоматический режим"  >> $LOG
+	fanOnOff $i 0
+	sleep 1
+fi
+if [ $tGPU -ge $T_MIN -a $tGPU -lt $T_1 ] ; then
+	echo "F1 Включаем скорость $F_MIN%"  >> $LOG
+	fanOnOff $i 1
+	fanSpeed $i $F_MIN
+	sleep 1
+fi
+if [ $tGPU -ge $T_1 -a $tGPU -lt $T_2 ] ; then
+	echo "F2 Включаем скорость $F_1%"  >> $LOG
+	fanOnOff $i 1
+	fanSpeed $i $F_1
+	sleep 1
+fi
+if [ $tGPU -ge $T_2 -a $tGPU -lt $T_3 ] ; then
+	echo "F3 Включаем скорость $F_2%"  >> $LOG
+	fanOnOff $i 1
+	fanSpeed $i $F_2
+	sleep 1
+fi
+if [ $tGPU -ge $T_3 -a $tGPU -lt $T_4 ] ; then 
+	echo "F4 Включаем скорость $F_3%"  >> $LOG
+	fanOnOff $i 1
+	fanSpeed $i $F_3
+	sleep 1
+fi
+if [ $tGPU -ge $T_4 -a $tGPU -lt $T_5 ] ; then
+	echo "F5 Включаем скорость $F_4%"  >> $LOG
+	fanOnOff $i 1
+	fanSpeed $i $F_4
+	sleep 1
+fi
+if [ $tGPU -ge $T_5 -a $tGPU -lt $T_MAX ] ; then
+	echo "F6 Включаем скорость $F_5%"  >> $LOG
+	fanOnOff $i 1
+	fanSpeed $i $F_5
+	sleep 1
+fi
+if [ $tGPU -ge $T_MAX ] ; then
+	echo "F_MAX Включаем скорость $F_MAX%"  >> $LOG
+	fanOnOff $i 1
+	fanSpeed $i $F_MAX
+	sleep 1
+fi
+done
