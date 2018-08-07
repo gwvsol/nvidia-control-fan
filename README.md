@@ -22,6 +22,7 @@ e          - Редактирование файла настроек прогр
 графический интерфейс будет включать в себя 4 пункта меню
 
 Для автоматического включение скрипта, создаем в CRON следующее задание
+
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/local/cuda/bin
 @hourly /opt/mining/.bin/controlTemp REG # включение скрипта каждый час
